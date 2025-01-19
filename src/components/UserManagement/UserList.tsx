@@ -1,28 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { fetchUsers } from '../../services/api';
+import { User } from "../../types/User";
 
-interface User {
-    id: number;
-    name: string;
-    email: string;
+interface UserListProps {
+    users: User[];
 }
 
-const UserList: React.FC = () => {
-    const [users, setUsers] = useState<User[]>([]);
-
-    const getUsers = async () => {
-        try {
-            const data = await fetchUsers();
-            setUsers(data);
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        }
-    };
-
-    useEffect(() => {
-        getUsers();
-    }, []);
-
+const UserList = ({ users }: UserListProps) => {
+    console.log(users);
+    
     return (
         <div className="user-list max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Users</h2>
@@ -30,7 +14,7 @@ const UserList: React.FC = () => {
                 {users.length > 0 ? (
                     users.map((user) => (
                         <li
-                            key={user.id}
+                            key={user._id}
                             className="flex justify-between items-center p-4 border border-gray-300 rounded-md hover:bg-gray-50"
                         >
                             <span className="font-medium text-gray-800">{user.name}</span>
