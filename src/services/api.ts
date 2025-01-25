@@ -13,9 +13,22 @@ export const fetchUsers = async () => {
     }
 };
 
+// get user by token
+export const getUserByToken = async () => {
+    try {
+        const response = await axios.get(`${API_BASE}/users/currentUser`);
+        console.log(response);
+
+        return response.data;
+    } catch (error: any) {
+        console.error("Error fetching current user:", error);
+        throw error;
+    }
+}
+
 // Create a user
 export const registerUser = async (user: { name: string; email: string; password: string }) => {
-    try {        
+    try {
         const response = await axios.post(`${API_BASE}/auth/register`, user);
         return response.data;
     } catch (error: any) {
@@ -47,12 +60,11 @@ export const logoutUser = async () => {
 };
 
 // Send a message
-export const sendMessage = async (senderId: string, receiverId: string, content: string) => {
+export const sendMessage = async (receiverId: string, message: string) => {
     try {
         const response = await axios.post(`${API_BASE}/messages/send`, {
-            senderId,
             receiverId,
-            content
+            message
         });
         return response.data;
     } catch (error: any) {
@@ -62,9 +74,9 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
 };
 
 // Get messages between two users
-export const getMessages = async (userId1: string, userId2: string) => {
+export const getMessages = async (receiverId: string) => {
     try {
-        const response = await axios.get(`${API_BASE}/messages/${userId1}/${userId2}`);
+        const response = await axios.get(`${API_BASE}/messages/${receiverId}`);
         return response.data;
     } catch (error: any) {
         console.error('Error fetching messages:', error.response?.data || error.message);
