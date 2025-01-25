@@ -2,6 +2,8 @@ import React, { useState, useTransition } from 'react';
 import { loginUser } from '../../services/api';
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
+import { routes } from '../../services/routes';
 
 const Login: React.FC = () => {
     const [formData, setFormData] = useState({
@@ -18,6 +20,8 @@ const Login: React.FC = () => {
     const [status, setStatus] = useState<string>(''); // Message status (success or error)
     const [isPending, startTransition] = useTransition();
     const [type, setType] = useState('password');
+
+    const navigate = useNavigate();
 
     const handleToggle = () => {
         if (type === 'password') {
@@ -76,11 +80,12 @@ const Login: React.FC = () => {
             try {
                 const response = await loginUser(email, password); // API call
                 setMessage(response.message);
-                setStatus(response.status); // Assuming 'status' is "success" or "error"
+                setStatus(response.status);
                 setTimeout(() => {
                     setMessage('');
                     setStatus('');
                 }, 3000);
+                navigate(`${routes.chat.path}`);
                 console.log('Login response:', response);
             } catch (error: any) {
                 const errorMsg = error.message || 'Login failed. Please try again.';

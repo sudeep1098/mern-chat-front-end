@@ -1,7 +1,9 @@
 import React, { useState, useTransition } from 'react';
-import { fetchUsers, registerUser } from '../../services/api';
+import { registerUser } from '../../services/api';
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
+import { routes } from '../../services/routes';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -23,6 +25,8 @@ const Register = () => {
     const [isPending, startTransition] = useTransition();
     const [passwordType, setPasswordType] = useState('password');
     const [confirmPasswordType, setConfirmPasswordType] = useState('password');
+
+    const navigate = useNavigate();
 
     const handlePasswordToggle = () => {
         setPasswordType(passwordType === 'password' ? 'text' : 'password');
@@ -116,7 +120,7 @@ const Register = () => {
                     setMessage('');
                     setStatus('');
                 }, 3000);
-                await fetchUsers();
+                navigate(`${routes.login.path}`);
             } catch (error: any) {
                 const errorMsg = error.message || 'Failed to create user.';
                 setMessage(errorMsg);

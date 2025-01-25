@@ -15,6 +15,7 @@ const App: React.FC = () => {
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/users" element={<UsersPage />} />
       </Routes>
     </Router>
   );

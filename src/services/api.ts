@@ -35,6 +35,17 @@ export const loginUser = async (email: string, password: string) => {
     }
 };
 
+// Logout a user
+export const logoutUser = async () => {
+    try {
+        const response = await axios.get(`${API_BASE}/auth/logout`);
+        return response.data;
+    } catch (error) {
+        console.error("Error logging out:", error);
+        throw error;
+    }
+};
+
 // Send a message
 export const sendMessage = async (senderId: string, receiverId: string, content: string) => {
     try {
