@@ -1,66 +1,54 @@
 import React, { useEffect, useState } from 'react';
-import socket from '../../services/socket';
-import { getMessages, getUserByToken } from '../../services/api';
 import { User } from '../../types/User';
 import { Message } from '../../types/Message';
-import axios from 'axios';
+import { markAsRead } from '../../services/api';
 
-const MessageList: React.FC<{ receiver: User | null }> = ({ receiver }) => {
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
+interface MessageListProps {
+    messages: Message[];
+    receiver: User | null;
+    currentUser: User | null;
+}
 
-    console.log(currentUser);
+const MessageList: React.FC<MessageListProps> = ({
+    messages,
+    receiver,
+    currentUser,
+}) => {
+    const [messagesWithStatus, setMessagesWithStatus] = useState(messages);
 
-    // Fetch the current user
     useEffect(() => {
-        const fetchCurrentUser = async () => {
-            try {
-                const user = await getUserByToken();
-                setCurrentUser(user);
-            } catch (error) {
-                console.error("Error fetching current user:", error);
+        const markMessagesAsReadForReceiver = async () => {
+            if (receiver && currentUser) {
+                const unreadMessages = messages.filter(
+                    (msg) =>
+                        msg.read === false
+                );
+
+                console.log(unreadMessages);
+
+                for (const msg of unreadMessages) {
+                    console.log(msg);
+                    await markAsRead(msg._id);
+                }
+
+                setMessagesWithStatus((prevMessages) =>
+                    prevMessages.map((msg) =>
+                        msg.read === false ? { ...msg, read: true } : msg
+                    )
+                );
             }
         };
-        fetchCurrentUser();
-    }, []);
 
-    // Handle incoming socket messages
+        markMessagesAsReadForReceiver();
+    }, [receiver, currentUser, messages]);
+
     useEffect(() => {
-        socket.on('message', (msg: Message) => {
-            setMessages((prevMessages) => [...prevMessages, msg]);
-        });
-        return () => {
-            socket.off('message');
-        };
-    }, []);
-
-    // Fetch messages between the current user and the receiver
-    useEffect(() => {
-        if (receiver) {
-            fetchMessages(receiver._id);
-        }
-    }, [receiver]);
-
-    const fetchMessages = async (receiverId: string) => {
-        try {
-            const sentMessages = await axios.get(`/api/messages/sent/${receiverId}`, { withCredentials: true });
-            const receivedMessages = await axios.get(`/api/messages/received/${receiverId}`, { withCredentials: true });
-            console.log(sentMessages, receivedMessages);
-
-            const allMessages = [...sentMessages.data, ...receivedMessages.data];
-            console.log(allMessages);
-
-            allMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-
-            setMessages(allMessages);
-        } catch (error) {
-            console.error('Error fetching messages:', error);
-        }
-    };
+        setMessagesWithStatus(messages);
+    }, [messages]);
 
     return (
         <div className="message-list flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((msg) => {
+            {messagesWithStatus.map((msg) => {
                 const isCurrentUser = msg.sender === currentUser?._id;
                 return (
                     <div
@@ -71,6 +59,13 @@ const MessageList: React.FC<{ receiver: User | null }> = ({ receiver }) => {
                             {isCurrentUser ? 'You' : receiver?.name}:
                         </div>
                         <div className="content text-sm break-words">{msg.message}</div>
+                        <div className="message-status text-xs mt-1 flex items-center">
+                            {msg.read ? (
+                                <span className="text-gray-500">✔✔</span>
+                            ) : (
+                                <span className="text-gray-500">✔</span>
+                            )}
+                        </div>
                     </div>
                 );
             })}

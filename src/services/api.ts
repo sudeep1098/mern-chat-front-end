@@ -76,7 +76,7 @@ export const sendMessage = async (receiverId: string, message: string) => {
 // Get messages between two users
 export const getMessages = async (receiverId: string) => {
     try {
-        const response = await axios.get(`${API_BASE}/messages/${receiverId}`);
+        const response = await axios.post(`${API_BASE}/messages`, { receiverId });
         return response.data;
     } catch (error: any) {
         console.error('Error fetching messages:', error.response?.data || error.message);
@@ -87,7 +87,7 @@ export const getMessages = async (receiverId: string) => {
 // Mark a message as read
 export const markAsRead = async (messageId: string) => {
     try {
-        const response = await axios.patch(`${API_BASE}/messages/${messageId}/read`);
+        const response = await axios.patch(`${API_BASE}/messages/${messageId}/markAsRead`);
         return response.data;
     } catch (error: any) {
         console.error('Error marking message as read:', error.response?.data || error.message);

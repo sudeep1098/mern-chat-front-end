@@ -12,7 +12,9 @@ const Navbar: React.FC = () => {
         const checkAuth = () => {
             const jwt = Cookies.get('jwt');
             setIsAuthenticated(!!jwt);
-            if (!jwt) navigate(routes.login.path);
+            if (!jwt && window.location.pathname !== routes.register.path) {
+                navigate(routes.login.path);
+            }
         };
 
         checkAuth();

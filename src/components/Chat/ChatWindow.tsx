@@ -1,42 +1,58 @@
 import React from 'react';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
-import socket from '../../services/socket';
 import { User } from '../../types/User';
+import { Message } from '../../types/Message';
+import { getMessages, sendMessage } from '../../services/api';
+import Typing from './Typing';
 
-const ChatWindow: React.FC<{ isConnected: boolean; receiver: User|null }> = ({
+interface ChatWindowProps {
+    isConnected: boolean;
+    receiver: User | null;
+    currentUser: User | null;
+    messages: Message[];
+    onSendMessage: (message: Message) => void;
+    onTyping: (isTyping: boolean) => void;
+    typing: { isTyping: boolean, receiver: string };
+}
+
+const ChatWindow: React.FC<ChatWindowProps> = ({
     isConnected,
     receiver,
+    currentUser,
+    messages,
+    onSendMessage,
+    onTyping,
+    typing,
 }) => {
-    const handleConnect = () => socket.connect();
-    const handleDisconnect = () => socket.disconnect();
+    const handleSendMessage = async (messageText: string) => {
+        if (receiver && currentUser) {
+            const message = await sendMessage(receiver._id, messageText);
+            onSendMessage(message);
+        }
+    };
+
+    const handleTyping = (isTyping: boolean) => {
+        if (receiver && currentUser) {
+            onTyping(isTyping);
+        }
+    };
 
     return (
         <div className="chat-window flex flex-col bg-white p-6 rounded-lg shadow-lg">
             <div className="connection-status mb-4 flex justify-between items-center">
-                <p className="text-lg font-semibold text-gray-800">
-                    {isConnected ? 'Connected' : 'Disconnected'}
-                </p>
-                <div className="flex space-x-4">
-                    <button
-                        onClick={handleConnect}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none"
-                        disabled={isConnected}
-                    >
-                        Connect
-                    </button>
-                    <button
-                        onClick={handleDisconnect}
-                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none"
-                        disabled={!isConnected}
-                    >
-                        Disconnect
-                    </button>
+                <div>
+                    <p className="text-lg font-semibold text-gray-800">Current User: {currentUser?.name}</p>
+                </div>
+                <div>
+                    <p className="text-lg font-semibold text-gray-800">
+                        Connection Status: {isConnected ? 'Connected' : 'Disconnected'}
+                    </p>
                 </div>
             </div>
-
-            <MessageList receiver={receiver} />
-            <MessageInput receiver={receiver} />
+            <MessageList messages={messages} currentUser={currentUser} receiver={receiver} />
+            <Typing typing={typing} currentUser={currentUser} receiver={receiver} />
+            <MessageInput isTyping={typing} onTyping={handleTyping} onSendMessage={handleSendMessage} receiver={receiver} />
         </div>
     );
 };
